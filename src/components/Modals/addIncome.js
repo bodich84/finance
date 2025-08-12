@@ -1,5 +1,6 @@
 import {Button, Modal, Form, Input, Select, DatePicker} from 'antd'
 import {accounts} from '../../constants'
+import dayjs from 'dayjs'
 
 const AddIncome = ({isIncomeModalVisible, handleIncomeCancel, onFinish}) => {
   const [form] = Form.useForm()
@@ -20,6 +21,17 @@ const AddIncome = ({isIncomeModalVisible, handleIncomeCancel, onFinish}) => {
             form.resetFields()
           }}
         >
+          <Form.Item
+            style={{fontWeight: 600, maxWidth: '50%'}}
+            label='Сума'
+            name='amount'
+            rules={[
+              {required: true, message: 'Please enter the income amount'},
+            ]}
+          >
+            <Input type='number' inputMode='decimal' addonBefore='₴' />
+          </Form.Item>
+
           <Form.Item
             style={{fontWeight: 600}}
             label='Рахунок'
@@ -50,22 +62,12 @@ const AddIncome = ({isIncomeModalVisible, handleIncomeCancel, onFinish}) => {
 
           <Form.Item
             style={{fontWeight: 600}}
-            label='Сума'
-            name='amount'
-            rules={[
-              {required: true, message: 'Please enter the income amount'},
-            ]}
-          >
-            <Input type='number' />
-          </Form.Item>
-
-          <Form.Item
-            style={{fontWeight: 600}}
             label='Дата'
             name='date'
             rules={[
               {required: true, message: 'Please select the income date!'},
             ]}
+            initialValue={dayjs(new Date())}
           >
             <DatePicker />
           </Form.Item>
@@ -86,7 +88,7 @@ const AddIncome = ({isIncomeModalVisible, handleIncomeCancel, onFinish}) => {
 
           <Form.Item>
             <Button htmlType='submit' className='btn reset-balance-btn'>
-              Add Income
+              Додати дохід
             </Button>
           </Form.Item>
         </Form>

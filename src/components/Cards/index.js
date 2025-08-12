@@ -21,7 +21,7 @@ const Cards = ({
           <h2 className="mycard-title">Дохід</h2>
           <p>₴ {income}</p>
           <button className="btn reset-balance-btn" onClick={showIncomeModal}>
-            Додати дохід
+            Додати
           </button>
         </div>
 
@@ -29,14 +29,14 @@ const Cards = ({
           <h2 className="mycard-title">Витрати</h2>
           <p>₴ -{expense}</p>
           <button className="btn reset-balance-btn" onClick={showExpenseModal}>
-            Додати витрати
+            Додати
           </button>
         </div>
 
         <div className="mycard mycard__transfer">
           <h2 className="mycard-title">Переказ</h2>
           <button className="btn reset-balance-btn" onClick={showTransferModal}>
-            Додати переказ
+            Додати
           </button>
         </div>
         
