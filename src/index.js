@@ -1,15 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { sendToVercelAnalytics } from './vitals';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import App from './App'
+import {TransactionsProvider} from './context/TransactionsContext'
+import {ExpenseCategoriesProvider} from './context/ExpenseCategoriesContext'
+import "./index.css";
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ExpenseCategoriesProvider>
+    <TransactionsProvider>
+      <App />
+    </TransactionsProvider>
+    </ExpenseCategoriesProvider>
   </React.StrictMode>,
   document.getElementById('root')
-);
-
-reportWebVitals(sendToVercelAnalytics);
+)

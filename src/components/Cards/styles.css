@@ -1,0 +1,43 @@
+.balance {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+  width: 95vw;
+  margin: 1.5rem auto;
+}
+
+.mycard {
+  box-shadow: var(--shadow-color);
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1em;
+  border-radius: .5rem;
+}
+
+.mycard__transfer button {
+  margin-top: auto;
+}
+
+.current-balance {
+  color: var(--white);
+  background-color: var(--primary-purple);
+  /* background-image: linear-gradient(315deg, #6842EF 0%, #8161f4 74%); */
+}
+
+.current-balance h2 {
+  font-size: 1.4rem !important;
+}
+
+.balance-amount {
+  font-size: 1.9rem !important;
+  font-weight: 600 !important;
+}
+
+.current-balance p {
+  font-size: 1.9rem !important;
+  font-weight: 600 !important;
+  text-shadow: var(--shadow-color) !important;
+}
