@@ -4,8 +4,9 @@ import App from './App'
 import {TransactionsProvider} from './context/TransactionsContext'
 import {ExpenseCategoriesProvider} from './context/ExpenseCategoriesContext'
 import "./index.css";
-// import * as serviceWorkerRegistration from './serviceWorkerRegistration';
-// serviceWorkerRegistration.register();
+import { register } from './serviceWorkerRegistration';
+
+register();
 
 ReactDOM.render(
   <React.StrictMode>

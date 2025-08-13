@@ -1,10 +1,11 @@
 import {createContext, useContext, useState, useEffect} from 'react'
-import {auth, db} from '../firebase'
+import {auth, db, doc} from '../firebase'
 import {useAuthState} from 'react-firebase-hooks/auth'
 import {
   collection,
   getDocs,
   addDoc,
+  deleteDoc,
   Timestamp,
   query,
   orderBy,
@@ -74,6 +75,19 @@ export const TransactionsProvider = ({children}) => {
     }
   }
 
+  const deleteTransaction = async (id) => {
+  if (!user) return;
+  try {
+    await deleteDoc(doc(db, `users/${user.uid}/transactions`, id));
+    // оптимістично прибираємо з локального стейту
+    setTransactions((prev) => prev.filter((t) => t.id !== id));
+    toast.success('Транзакцію видалено');
+  } catch (e) {
+    console.error('Delete error:', e);
+    toast.error('Не вдалося видалити транзакцію');
+  }
+};
+
   const updateTransaction = async (id, updatedData) => {
     try {
       const res = await fetch(`/api/transactions/${id}`, {
@@ -105,6 +119,7 @@ export const TransactionsProvider = ({children}) => {
         updateTransaction,
         dateRange,
         setDateRange,
+        deleteTransaction,
       }}
     >
       {children}

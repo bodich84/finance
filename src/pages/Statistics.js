@@ -1,10 +1,6 @@
 import {useState, useEffect, useMemo} from 'react'
-import {DatePicker, Space, Checkbox} from 'antd'
+import {DatePicker, Space} from 'antd'
 import {toast} from 'react-toastify'
-import Cards from '../components/Cards'
-import AddExpense from '../components/Modals/addExpense'
-import AddIncome from '../components/Modals/addIncome'
-import AddTransfer from '../components/Modals/AddTransfer'
 import {useTransactions} from '../context/TransactionsContext'
 import {
   PieChart,
@@ -184,7 +180,9 @@ const Statistics = () => {
         }}
       >
         <div>
-          <h3 className=''><center>Доходи по рахунках</center></h3>
+          <h3 className=''>
+            <center>Доходи по рахунках</center>
+          </h3>
           <PieChart width={400} height={300}>
             <Pie
               data={incomeByAccount}
@@ -206,7 +204,9 @@ const Statistics = () => {
         </div>
 
         <div>
-          <h3><center>Витрати по назвах</center></h3>
+          <h3>
+            <center>Витрати по назвах</center>
+          </h3>
           <PieChart width={400} height={300}>
             <Pie
               data={expenseByName}

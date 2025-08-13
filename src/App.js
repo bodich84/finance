@@ -25,6 +25,7 @@ function App() {
       />
       <Router>
         <Header />
+
         <Routes>
           <Route path='/' element={<Signup />} />
           <Route path='/dashboard' element={<Dashboard />} />
