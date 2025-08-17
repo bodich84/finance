@@ -1,4 +1,4 @@
-import { Modal, Form, InputNumber, Select, Button, DatePicker } from 'antd'
+import {Modal, Form, InputNumber, Button, DatePicker} from 'antd'
 import dayjs from 'dayjs'
 import AccountSelect from './AccountSelect'
 
@@ -24,7 +24,7 @@ const AddTransfer = ({
       amount: Number(values.amount),
       date: normalizeDate(values.date),
     }
-    onTransfer?.(payload)       // далі у контексті робиш дві проводки з одним transferId
+    onTransfer?.(payload) // далі у контексті робиш дві проводки з одним transferId
     form.resetFields()
     handleTransferCancel()
   }
@@ -40,16 +40,17 @@ const AddTransfer = ({
         form={form}
         layout='vertical'
         onFinish={onFinish}
-        initialValues={{ date: dayjs() }}
+        initialValues={{date: dayjs()}}
       >
         <Form.Item
           label='Сума'
           name='amount'
           rules={[
-            { required: true, message: 'Вкажіть суму переказу' },
+            {required: true, message: 'Вкажіть суму переказу'},
             () => ({
               validator(_, value) {
-                if (value === undefined || value === null) return Promise.reject()
+                if (value === undefined || value === null)
+                  return Promise.reject()
                 const n = Number(value)
                 if (Number.isNaN(n) || n <= 0) {
                   return Promise.reject(new Error('Сума має бути > 0'))
@@ -60,7 +61,7 @@ const AddTransfer = ({
           ]}
         >
           <InputNumber
-            style={{ width: '100%' }}
+            style={{width: '100%'}}
             min={0.01}
             step={0.01}
             stringMode
@@ -72,7 +73,7 @@ const AddTransfer = ({
         <Form.Item
           label='З рахунку'
           name='from'
-          rules={[{ required: true, message: 'Оберіть рахунок списання' }]}
+          rules={[{required: true, message: 'Оберіть рахунок списання'}]}
         >
           <AccountSelect />
         </Form.Item>
@@ -81,12 +82,14 @@ const AddTransfer = ({
           label='На рахунок'
           name='to'
           rules={[
-            { required: true, message: 'Оберіть рахунок зарахування' },
-            ({ getFieldValue }) => ({
+            {required: true, message: 'Оберіть рахунок зарахування'},
+            ({getFieldValue}) => ({
               validator(_, value) {
                 if (!value) return Promise.resolve()
                 if (value === getFieldValue('from')) {
-                  return Promise.reject(new Error('Рахунки не можуть співпадати'))
+                  return Promise.reject(
+                    new Error('Рахунки не можуть співпадати')
+                  )
                 }
                 return Promise.resolve()
               },
@@ -99,9 +102,9 @@ const AddTransfer = ({
         <Form.Item
           label='Дата'
           name='date'
-          rules={[{ required: true, message: 'Оберіть дату' }]}
+          rules={[{required: true, message: 'Оберіть дату'}]}
         >
-          <DatePicker style={{ width: '100%' }} />
+          <DatePicker style={{width: '100%'}} />
         </Form.Item>
 
         <Form.Item>

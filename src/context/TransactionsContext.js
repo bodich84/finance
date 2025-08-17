@@ -4,7 +4,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
   Timestamp, query, orderBy, onSnapshot, serverTimestamp,
-  writeBatch, where,
+  writeBatch,
 } from "firebase/firestore";
 import { toast } from "react-toastify";
 

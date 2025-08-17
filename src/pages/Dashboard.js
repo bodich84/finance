@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import { DatePicker, Space, Checkbox } from 'antd'
-import dayjs from 'dayjs'
 import TransactionsTable from '../components/TransactionsTable'
 import { useTransactions } from '../context/TransactionsContext'
 import { useDateRange } from '../context/DateRangeContext'
