@@ -11,7 +11,7 @@ import {useTransactions} from '../context/TransactionsContext'
 const {RangePicker} = DatePicker
 
 const Dashboard = () => {
-  const {transactions, addTransaction, dateRange, setDateRange} =
+  const {transactions, deleteTransaction, dateRange, setDateRange, editTransaction} =
     useTransactions()
 
   const [showTransfers, setShowTransfers] = useState(true)
@@ -44,7 +44,7 @@ const Dashboard = () => {
 
       <TransactionsTable
         transactions={filteredTransactions}
-        addTransaction={addTransaction}
+        deleteTransaction={deleteTransaction}
       />
     </div>
   )

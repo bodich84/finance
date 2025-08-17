@@ -1,9 +1,9 @@
 import './styles.css'
-import { Table, Popconfirm, Button } from 'antd'
-import { DeleteOutlined } from '@ant-design/icons'
+import { Table, Popconfirm, Dropdown, Button } from 'antd'
+import { DeleteOutlined, EditOutlined, MoreOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
-const TransactionsTable = ({ transactions, deleteTransaction }) => {
+const TransactionsTable = ({ transactions, deleteTransaction, editTransaction }) => {
   const columns = [
     {
       title: 'Дата',
@@ -11,7 +11,7 @@ const TransactionsTable = ({ transactions, deleteTransaction }) => {
       key: 'date',
       render: (value) => {
         const dateObj = value?.toDate ? value.toDate() : new Date(value)
-        return dayjs(dateObj).format('DD-MM-YYYY')
+        return dayjs(dateObj).format('DD.MM.YY')
       },
     },
     {
@@ -42,16 +42,45 @@ const TransactionsTable = ({ transactions, deleteTransaction }) => {
     {
       title: 'Дії',
       key: 'actions',
-      render: (_, record) => (
-        <Popconfirm
-          title="Видалити транзакцію?"
-          okText="Так"
-          cancelText="Ні"
-          onConfirm={() => deleteTransaction(record.id)}
-        >
-          <Button type="text" danger icon={<DeleteOutlined />} />
-        </Popconfirm>
-      ),
+      render: (_, record) => {
+        const items = [
+          {
+            key: 'edit',
+            label: 'Редагувати',
+            icon: <EditOutlined />,
+            onClick: () => editTransaction(record),
+          },
+          {
+            key: 'delete',
+            label: (
+              <Popconfirm
+                title="Видалити транзакцію?"
+                okText="Так"
+                cancelText="Ні"
+                onConfirm={() => deleteTransaction(record.id)}
+                onClick={(e) => e.stopPropagation()} // щоб клік не закривав меню одразу
+              >
+                Видалити
+              </Popconfirm>
+            ),
+            icon: <DeleteOutlined style={{ color: 'red' }} />,
+          },
+        ];
+
+        return (
+          <Dropdown
+            menu={{ items }}
+            trigger={['click']}
+            placement="bottomRight"
+          >
+            <Button
+              type="text"
+              icon={<MoreOutlined />}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </Dropdown>
+        );
+      },
     },
   ]
 
@@ -63,7 +92,7 @@ const TransactionsTable = ({ transactions, deleteTransaction }) => {
         <Table
           dataSource={transactions}
           columns={columns}
-          rowKey="id" // 🔹 важливо для коректного оновлення
+          rowKey="id"
           className='table'
           rowClassName={(record) => {
             if (record.type === 'income') return 'row-income'
