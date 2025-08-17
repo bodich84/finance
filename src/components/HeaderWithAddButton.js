@@ -3,9 +3,9 @@ import { Dropdown, Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useTransactions } from '../context/TransactionsContext';
 import { toast } from 'react-toastify';
-import AddIncome from './Modals/AddIncome';
-import AddExpense from './Modals/AddExpense';
-import AddTransfer from './Modals/AddTransfer';
+import AddIncome from './modals/AddIncome';
+import AddExpense from './modals/AddExpense';
+import AddTransfer from './modals/AddTransfer';
 
 const normalizeToDate = (v) => {
   if (!v) return null;
