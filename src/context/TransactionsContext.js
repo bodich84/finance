@@ -1,128 +1,241 @@
-import {createContext, useContext, useState, useEffect} from 'react'
-import {auth, db, doc} from '../firebase'
-import {useAuthState} from 'react-firebase-hooks/auth'
+import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { auth, db } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import {
-  collection,
-  getDocs,
-  addDoc,
-  deleteDoc,
-  Timestamp,
-  query,
-  orderBy,
-  where,
-} from 'firebase/firestore'
-import {toast} from 'react-toastify'
+  collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
+  Timestamp, query, orderBy, onSnapshot, serverTimestamp,
+  writeBatch, where,
+} from "firebase/firestore";
+import { toast } from "react-toastify";
 
-const TransactionsContext = createContext()
-export const useTransactions = () => useContext(TransactionsContext)
+const TransactionsContext = createContext();
+export const useTransactions = () => useContext(TransactionsContext);
 
-export const TransactionsProvider = ({children}) => {
-  const [user] = useAuthState(auth)
-  const [transactions, setTransactions] = useState([])
-  const [dateRange, setDateRange] = useState([])
-
-  const fetchTransactions = async () => {
-    if (!user) return
-
-    let dataRef = collection(db, `users/${user.uid}/transactions`)
-
-    if (dateRange.length === 2) {
-      const [start, end] = dateRange
-      const startTimestamp = Timestamp.fromDate(
-        new Date(start.startOf('day').toISOString())
-      )
-      const endTimestamp = Timestamp.fromDate(
-        new Date(end.endOf('day').toISOString())
-      )
-
-      dataRef = query(
-        collection(db, `users/${user.uid}/transactions`),
-        where('date', '>=', startTimestamp),
-        where('date', '<=', endTimestamp),
-        orderBy('date', 'desc')
-      )
-    } else {
-      dataRef = query(
-        collection(db, `users/${user.uid}/transactions`),
-        orderBy('date', 'desc')
-      )
-    }
-
-    const querySnapshot = await getDocs(dataRef)
-    const transactionArray = []
-    querySnapshot.forEach((doc) =>
-      transactionArray.push({...doc.data(), id: doc.id})
-    )
-    setTransactions(transactionArray)
-    toast.success('Transactions fetched!')
-  }
-
-  const addTransaction = async (transaction) => {
-    try {
-      const formattedTransaction = {
-        ...transaction,
-        date: Timestamp.fromDate(new Date(transaction.date)),
-      }
-      await addDoc(
-        collection(db, `users/${user.uid}/transactions`),
-        formattedTransaction
-      )
-      toast.success('Transaction Added!')
-      fetchTransactions()
-    } catch (err) {
-      console.error('Add transaction error:', err)
-      toast.error("Couldn't add transaction")
-    }
-  }
-
-  const deleteTransaction = async (id) => {
-  if (!user) return;
-  try {
-    await deleteDoc(doc(db, `users/${user.uid}/transactions`, id));
-    // оптимістично прибираємо з локального стейту
-    setTransactions((prev) => prev.filter((t) => t.id !== id));
-    toast.success('Транзакцію видалено');
-  } catch (e) {
-    console.error('Delete error:', e);
-    toast.error('Не вдалося видалити транзакцію');
-  }
+// ✅ уніфікація дат
+const normalizeToDate = (value) => {
+  if (!value) return null;
+  if (typeof value?.toDate === 'function') return value.toDate(); // Firestore.Timestamp
+  if (value instanceof Date) return value;
+  return new Date(value); // string/number/dayjs -> Date
 };
 
-  const updateTransaction = async (id, updatedData) => {
-    try {
-      const res = await fetch(`/api/transactions/${id}`, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(updatedData),
-      })
+export const TransactionsProvider = ({ children }) => {
+  const [user] = useAuthState(auth);
+  const [transactions, setTransactions] = useState([]);
+  const [tableRows, setTableRows] = useState([]);
+  const unsubRef = useRef(null);
 
-      if (!res.ok) throw new Error('Failed to update transaction')
+  const transactionsRef = collection(db, "workspaces", "mainWorkspace", "transactions");
 
-      setTransactions((prev) =>
-        prev.map((t) => (t.id === id ? {...t, ...updatedData} : t))
-      )
-    } catch (error) {
-      console.error('Error updating transaction:', error)
+  const normalizeDateToTimestamp = (value) => {
+    if (value instanceof Timestamp) return value;
+    const d = normalizeToDate(value) ?? new Date();
+    return Timestamp.fromDate(d);
+  };
+
+  const buildRows = (list) => {
+    const rows = [];
+    const seen = new Set();
+
+    const byTid = new Map();
+    for (const t of list) {
+      if (t?.isTransfer && t?.transferId) {
+        const arr = byTid.get(t.transferId) ?? [];
+        arr.push({ ...t });
+        byTid.set(t.transferId, arr);
+      }
     }
-  }
+
+    for (const [tid, pair] of byTid) {
+      const out = pair.find(p => p.direction === 'out');
+      const inc = pair.find(p => p.direction === 'in');
+      if (out && inc) {
+        rows.push({
+          id: tid,
+          type: 'transfer',
+          from: out.account,
+          to: inc.account,
+          amount: out.amount,
+          date: out.date,
+          name: `${out.account} → ${inc.account}`,
+          comments: list.comments ?? '',
+          _pairDocIds: [out.id, inc.id],
+        });
+        seen.add(out.id); seen.add(inc.id);
+      }
+    }
+
+    for (const t of list) {
+      if (t.isTransfer && seen.has(t.id)) continue;
+      if (!t.isTransfer) {
+        rows.push({
+          id: t.id,
+          type: t.type,
+          account: t.account,
+          amount: t.amount,
+          date: t.date,
+          comments: t.comments ?? '',
+          name: t.name ?? '',
+        });
+      }
+    }
+
+    rows.sort((a, b) => {
+      const ad = normalizeToDate(a.date)?.getTime() ?? 0;
+      const bd = normalizeToDate(b.date)?.getTime() ?? 0;
+      return bd - ad;
+    });
+    return rows;
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      const q = query(transactionsRef, orderBy("date", "desc"));
+      const snap = await getDocs(q);
+      const arr = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setTransactions(arr);
+      setTableRows(buildRows(arr));
+      toast.success("Transactions fetched!");
+    } catch (err) {
+      console.error("fetchTransactions:", err.code, err.message);
+      toast.error(err.code === "permission-denied" ? "Немає доступу" : "Couldn't fetch transactions");
+    }
+  };
+
+  const addTransaction = async (t) => {
+    try {
+      if (!user) throw new Error("Not authenticated");
+      await addDoc(transactionsRef, {
+        ...t,
+        date: normalizeDateToTimestamp(t.date ?? new Date()),
+        createdBy: user.uid,
+        createdAt: serverTimestamp(),
+      });
+      toast.success("Transaction added!");
+    } catch (err) {
+      console.error("addTransaction:", err.code, err.message);
+      toast.error(err.code === "permission-denied" ? "Немає доступу" : "Couldn't add transaction");
+    }
+  };
+
+  const addTransfer = async ({ amount, from, to, date }) => {
+    try {
+      if (!user) throw new Error("Not authenticated");
+      const transferId = (typeof crypto !== "undefined" && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : doc(collection(db, "_ids")).id;
+
+      const batch = writeBatch(db);
+      const dateTs = normalizeDateToTimestamp(date ?? new Date());
+      const amt = Number(amount);
+
+      const outRef = doc(collection(db, "workspaces", "mainWorkspace", "transactions"));
+      const inRef  = doc(collection(db, "workspaces", "mainWorkspace", "transactions"));
+
+      batch.set(outRef, {
+        id: outRef.id,
+        type: "expense",
+        isTransfer: true,
+        direction: "out",
+        transferId,
+        pairId: inRef.id,
+        account: from,
+        amount: amt,
+        name: "Переказ",
+        comments: `→ ${to}`,
+        date: dateTs,
+        createdBy: user.uid,
+        createdAt: serverTimestamp(),
+      });
+
+      batch.set(inRef, {
+        id: inRef.id,
+        type: "income",
+        isTransfer: true,
+        direction: "in",
+        transferId,
+        pairId: outRef.id,
+        account: to,
+        amount: amt,
+        name: "Переказ",
+        comments: `← ${from}`,
+        date: dateTs,
+        createdBy: user.uid,
+        createdAt: serverTimestamp(),
+      });
+
+      await batch.commit();
+      toast.success("Transfer added!");
+    } catch (err) {
+      console.error("addTransfer:", err.code, err.message);
+      toast.error(err.code === "permission-denied" ? "Немає доступу" : "Couldn't add transfer");
+    }
+  };
+
+  const updateTransaction = async (id, updates) => {
+    try {
+      if (!user) throw new Error("Not authenticated");
+      const ref = doc(db, "workspaces", "mainWorkspace", "transactions", id);
+      const payload = { ...updates };
+      if (payload.date) payload.date = normalizeDateToTimestamp(payload.date);
+      delete payload.createdBy; delete payload.createdAt;
+
+      await updateDoc(ref, { ...payload, updatedAt: serverTimestamp() });
+      toast.success("Transaction updated!");
+    } catch (err) {
+      console.error("updateTransaction:", err.code, err.message);
+      toast.error(err.code === "permission-denied" ? "Немає доступу" : "Couldn't update transaction");
+    }
+  };
+
+  const deleteTransaction = async (id) => {
+    try {
+      if (!user) throw new Error("Not authenticated");
+      // простий варіант: видаляємо один документ;
+      // якщо у тебе реалізоване видалення за transferId — лишай попередню реалізацію.
+      await deleteDoc(doc(db, "workspaces", "mainWorkspace", "transactions", id));
+      toast.success("Transaction deleted!");
+    } catch (err) {
+      console.error("deleteTransaction:", err.code, err.message);
+      toast.error(err.code === "permission-denied" ? "Немає доступу" : "Couldn't delete transaction");
+    }
+  };
 
   useEffect(() => {
-    fetchTransactions()
-  }, [user, dateRange])
+    if (!user) {
+      setTransactions([]); setTableRows([]);
+      return;
+    }
+    const q = query(transactionsRef, orderBy("date", "desc"));
+    unsubRef.current = onSnapshot(
+      q,
+      (snap) => {
+        const arr = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setTransactions(arr);
+        setTableRows(buildRows(arr));
+      },
+      (err) => {
+        console.error("onSnapshot:", err.code, err.message);
+        toast.error(err.code === "permission-denied" ? "Немає доступу" : "Snapshot error");
+      }
+    );
+    return () => unsubRef.current?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
 
   return (
     <TransactionsContext.Provider
       value={{
         transactions,
+        tableRows,
         fetchTransactions,
         addTransaction,
+        addTransfer,
         updateTransaction,
-        dateRange,
-        setDateRange,
         deleteTransaction,
       }}
     >
       {children}
     </TransactionsContext.Provider>
-  )
-}
+  );
+};

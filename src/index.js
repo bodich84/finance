@@ -3,17 +3,23 @@ import ReactDOM from 'react-dom'
 import App from './App'
 import {TransactionsProvider} from './context/TransactionsContext'
 import {ExpenseCategoriesProvider} from './context/ExpenseCategoriesContext'
-import "./index.css";
-import { register } from './serviceWorkerRegistration';
+import {DateRangeProvider} from './context/DateRangeContext'
+import {AccountsProvider} from './context/AccountsContext'
+import './index.css'
+import {register} from './serviceWorkerRegistration'
 
-register();
+register()
 
 ReactDOM.render(
   <React.StrictMode>
     <ExpenseCategoriesProvider>
-    <TransactionsProvider>
-      <App />
-    </TransactionsProvider>
+      <TransactionsProvider>
+        <DateRangeProvider>
+          <AccountsProvider>
+            <App />
+          </AccountsProvider>
+        </DateRangeProvider>
+      </TransactionsProvider>
     </ExpenseCategoriesProvider>
   </React.StrictMode>,
   document.getElementById('root')

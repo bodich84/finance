@@ -1,6 +1,6 @@
-import {Button, Modal, Form, Input, Select, DatePicker} from 'antd'
+import {Button, Modal, Form, Input, DatePicker} from 'antd'
 import {useState} from 'react'
-import {accounts} from '../../constants'
+import AccountSelect from './AccountSelect'
 import ExpenseCategorySelect from './ExpenseCategorySelect'
 import dayjs from 'dayjs'
 
@@ -55,7 +55,7 @@ const AddExpense = ({isExpenseModalVisible, handleExpenseCancel, onFinish}) => {
             },
           ]}
         >
-          <Select options={accounts} />
+          <AccountSelect />
         </Form.Item>
 
         <Form.Item

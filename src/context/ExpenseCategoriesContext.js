@@ -1,31 +1,55 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { collection, getDocs, addDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
+import { auth, db } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../firebase";
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+} from "firebase/firestore";
 
 const ExpenseCategoriesContext = createContext();
+export const useExpenseCategories = () => useContext(ExpenseCategoriesContext);
 
 export const ExpenseCategoriesProvider = ({ children }) => {
   const [user] = useAuthState(auth);
   const [expenseCategories, setExpenseCategories] = useState([]);
+  const unsubRef = useRef(null);
 
-  const fetchExpenseCategories = async () => {
-    if (!user) return;
-    const snapshot = await getDocs(collection(db, `users/${user.uid}/expenseCategories`));
-    const cats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setExpenseCategories(cats);
-  };
+  // ✅ шлях у воркспейсі (спільні категорії)
+  const catsRef = collection(db, "workspaces", "mainWorkspace", "expenseCategories");
 
   const addExpenseCategory = async (category) => {
     if (!user) return;
-    await addDoc(collection(db, `users/${user.uid}/expenseCategories`), category);
-    fetchExpenseCategories();
+    // category: { name: 'Food', color: '#...' } тощо
+    await addDoc(catsRef, {
+      ...category,
+      createdAt: serverTimestamp(),
+      createdBy: user.uid,
+    });
   };
 
   useEffect(() => {
-    fetchExpenseCategories();
-  }, [user]);
+    // без користувача — не підписуємось
+    if (!user) return;
+
+    const q = query(catsRef, orderBy("createdAt", "asc"));
+    unsubRef.current = onSnapshot(
+      q,
+      (snap) => {
+        const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setExpenseCategories(list);
+      },
+      (err) => {
+        console.error("expenseCategories onSnapshot:", err.code, err.message);
+      }
+    );
+
+    return () => unsubRef.current?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
 
   return (
     <ExpenseCategoriesContext.Provider value={{ expenseCategories, addExpenseCategory }}>
@@ -33,5 +57,3 @@ export const ExpenseCategoriesProvider = ({ children }) => {
     </ExpenseCategoriesContext.Provider>
   );
 };
-
-export const useExpenseCategories = () => useContext(ExpenseCategoriesContext);

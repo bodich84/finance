@@ -7,8 +7,15 @@ import AddIncome from './Modals/AddIncome';
 import AddExpense from './Modals/AddExpense';
 import AddTransfer from './Modals/AddTransfer';
 
+const normalizeToDate = (v) => {
+  if (!v) return null;
+  if (typeof v?.toDate === 'function') return v.toDate(); // dayjs/antd
+  if (v instanceof Date) return v;
+  return new Date(v);
+};
+
 const HeaderWithAddButton = () => {
-  const { addTransaction } = useTransactions();
+  const { addTransaction, addTransfer } = useTransactions();
 
   const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
   const [isIncomeModalVisible, setIsIncomeModalVisible] = useState(false);
@@ -23,48 +30,34 @@ const HeaderWithAddButton = () => {
   const handleTransferCancel = () => setIsTransferModalVisible(false);
 
   const onFinish = (values, type) => {
-    if (!values.date) {
-      toast.error('Дата не вибрана');
-      return;
-    }
-    const newTransaction = {
+    const date = normalizeToDate(values.date);
+    if (!date) return toast.error('Дата не вибрана');
+
+    const amount = Number(values.amount);
+    if (!Number.isFinite(amount)) return toast.error('Некоректна сума');
+
+    addTransaction({
       type,
-      date: values.date.toDate(),
-      amount: parseFloat(values.amount),
+      date,
+      amount,
       name: values.name,
       comments: values.comments || '',
       account: values.account,
-    };
+    });
 
-    addTransaction(newTransaction);
     handleExpenseCancel();
     handleIncomeCancel();
     handleTransferCancel();
   };
 
-  const handleTransfer = async (values) => {
-    const { from, to, amount, date } = values;
+  const handleTransfer = async ({ from, to, amount, date }) => {
+    const d = normalizeToDate(date);
+    if (!d) return toast.error('Дата не вибрана');
 
-    const transferOut = {
-      type: 'transfer',
-      amount: -parseFloat(amount),
-      account: from,
-      date: date.toDate(),
-      name: 'Переказ',
-      comments: `Переказ на ${to}`,
-    };
+    const amt = Number(amount);
+    if (!Number.isFinite(amt) || amt <= 0) return toast.error('Некоректна сума');
 
-    const transferIn = {
-      type: 'transfer',
-      amount: parseFloat(amount),
-      account: to,
-      date: date.toDate(),
-      name: 'Переказ',
-      comments: `Переказ з ${from}`,
-    };
-
-    await Promise.all([addTransaction(transferOut), addTransaction(transferIn)]);
-    toast.success('Переказ виконано');
+    await addTransfer({ from, to, amount: amt, date: d }); // створює 2 проводки з одним transferId
     handleTransferCancel();
   };
 
@@ -77,20 +70,13 @@ const HeaderWithAddButton = () => {
   return (
     <>
       <Dropdown
-        menu={{
-          items: menuItems.map(({ key, label, onClick }) => ({
-            key,
-            label,
-            onClick,
-          })),
-        }}
+        menu={{ items: menuItems.map(({ key, label, onClick }) => ({ key, label, onClick })) }}
         placement="bottomRight"
         trigger={['click']}
       >
         <Button type="primary" shape="circle" icon={<PlusOutlined />} />
       </Dropdown>
 
-      {/* Модалки */}
       <AddExpense
         isExpenseModalVisible={isExpenseModalVisible}
         handleExpenseCancel={handleExpenseCancel}

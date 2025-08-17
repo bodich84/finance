@@ -60,7 +60,7 @@ const Header = () => {
       <div className='navbar'>
         <HeaderWithAddButton />
         <div className='logo-wrap'>
-          <div>₴ {currentBalance} ₴ / {income} ₴ / -{expense}</div>
+          <div>₴ {currentBalance} / ₴ {income} / ₴ -{expense}</div>
         </div>
 
         {/* Desktop menu */}

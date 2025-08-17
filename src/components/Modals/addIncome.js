@@ -1,5 +1,5 @@
 import {Button, Modal, Form, Input, Select, DatePicker} from 'antd'
-import {accounts} from '../../constants'
+import AccountSelect from './AccountSelect'
 import dayjs from 'dayjs'
 
 const AddIncome = ({isIncomeModalVisible, handleIncomeCancel, onFinish}) => {
@@ -43,7 +43,7 @@ const AddIncome = ({isIncomeModalVisible, handleIncomeCancel, onFinish}) => {
               },
             ]}
           >
-            <Select options={accounts} />
+            <AccountSelect />
           </Form.Item>
 
           <Form.Item
