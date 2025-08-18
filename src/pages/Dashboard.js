@@ -4,6 +4,8 @@ import TransactionsTable from '../components/TransactionsTable'
 import AddIncome from '../components/forms/AddIncome'
 import AddExpense from '../components/forms/AddExpense'
 import AddTransfer from '../components/forms/AddTransfer'
+import AddDividend from '../components/forms/AddDividend'
+import AddInvestment from '../components/forms/AddInvestment'
 import { useTransactions } from '../context/TransactionsContext'
 import { useDateRange } from '../context/DateRangeContext'
 
@@ -115,6 +117,22 @@ const Dashboard = () => {
         <AddExpense
           isExpenseModalVisible
           handleExpenseCancel={cancelEdit}
+          onFinish={handleEditFinish}
+          initialValues={editing}
+        />
+      )}
+      {editing?.type === 'dividend' && (
+        <AddDividend
+          isDividendModalVisible
+          handleDividendCancel={cancelEdit}
+          onFinish={handleEditFinish}
+          initialValues={editing}
+        />
+      )}
+      {editing?.type === 'investment' && (
+        <AddInvestment
+          isInvestmentModalVisible
+          handleInvestmentCancel={cancelEdit}
           onFinish={handleEditFinish}
           initialValues={editing}
         />

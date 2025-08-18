@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import AddIncome from './forms/AddIncome';
 import AddExpense from './forms/AddExpense';
 import AddTransfer from './forms/AddTransfer';
+import AddDividend from './forms/AddDividend';
+import AddInvestment from './forms/AddInvestment';
 
 const normalizeToDate = (v) => {
   if (!v) return null;
@@ -20,14 +22,20 @@ const HeaderWithAddButton = () => {
   const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
   const [isIncomeModalVisible, setIsIncomeModalVisible] = useState(false);
   const [isTransferModalVisible, setIsTransferModalVisible] = useState(false);
+  const [isDividendModalVisible, setIsDividendModalVisible] = useState(false);
+  const [isInvestmentModalVisible, setIsInvestmentModalVisible] = useState(false);
 
   const showExpenseModal = () => setIsExpenseModalVisible(true);
   const showIncomeModal = () => setIsIncomeModalVisible(true);
   const showTransferModal = () => setIsTransferModalVisible(true);
+  const showDividendModal = () => setIsDividendModalVisible(true);
+  const showInvestmentModal = () => setIsInvestmentModalVisible(true);
 
   const handleExpenseCancel = () => setIsExpenseModalVisible(false);
   const handleIncomeCancel = () => setIsIncomeModalVisible(false);
   const handleTransferCancel = () => setIsTransferModalVisible(false);
+  const handleDividendCancel = () => setIsDividendModalVisible(false);
+  const handleInvestmentCancel = () => setIsInvestmentModalVisible(false);
 
   const onFinish = (values, type) => {
     const date = normalizeToDate(values.date);
@@ -48,6 +56,8 @@ const HeaderWithAddButton = () => {
     handleExpenseCancel();
     handleIncomeCancel();
     handleTransferCancel();
+    handleDividendCancel();
+    handleInvestmentCancel();
   };
 
   const handleTransfer = async ({ from, to, amount, date }) => {
@@ -65,6 +75,8 @@ const HeaderWithAddButton = () => {
     { key: 'income', label: 'Дохід', onClick: showIncomeModal },
     { key: 'expense', label: 'Витрати', onClick: showExpenseModal },
     { key: 'transfer', label: 'Переказ', onClick: showTransferModal },
+    { key: 'dividend', label: 'Дивіденд', onClick: showDividendModal },
+    { key: 'investment', label: 'Інвестиція', onClick: showInvestmentModal },
   ];
 
   return (
@@ -91,6 +103,16 @@ const HeaderWithAddButton = () => {
         isTransferModalVisible={isTransferModalVisible}
         handleTransferCancel={handleTransferCancel}
         onTransfer={handleTransfer}
+      />
+      <AddDividend
+        isDividendModalVisible={isDividendModalVisible}
+        handleDividendCancel={handleDividendCancel}
+        onFinish={onFinish}
+      />
+      <AddInvestment
+        isInvestmentModalVisible={isInvestmentModalVisible}
+        handleInvestmentCancel={handleInvestmentCancel}
+        onFinish={onFinish}
       />
     </>
   );
