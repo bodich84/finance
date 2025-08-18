@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { DatePicker, Space, Checkbox } from 'antd'
 import TransactionsTable from '../components/TransactionsTable'
 import AddIncome from '../components/forms/AddIncome'
@@ -28,7 +28,25 @@ const Dashboard = () => {
   } = useTransactions()
   const { range, setRange, hasRange, startDate, endDate } = useDateRange()
 
-  const [showTransfers, setShowTransfers] = useState(true)
+  const ALL_TYPES = ['income', 'expense', 'transfer', 'dividend', 'investment']
+  const [types, setTypes] = useState(() => {
+    try {
+      const raw = localStorage.getItem('transactionTypes')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed) && parsed.length) {
+          return parsed
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return ALL_TYPES
+  })
+
+  useEffect(() => {
+    localStorage.setItem('transactionTypes', JSON.stringify(types))
+  }, [types])
   const [editing, setEditing] = useState(null)
 
   const startEdit = (t) => setEditing(t)
@@ -64,7 +82,7 @@ const Dashboard = () => {
 
   const data = useMemo(() => {
     const base = (tableRows?.length ? tableRows : transactions) || []
-    const byType = showTransfers ? base : base.filter((t) => t.type !== 'transfer')
+    const byType = base.filter((t) => types.includes(t.type))
     if (!hasRange) return byType
 
     const startTs = startDate.getTime()
@@ -76,7 +94,7 @@ const Dashboard = () => {
       const ts = d.getTime()
       return ts >= startTs && ts <= endTs
     })
-  }, [tableRows, transactions, showTransfers, hasRange, startDate, endDate])
+  }, [tableRows, transactions, types, hasRange, startDate, endDate])
 
   return (
     <div>
@@ -91,13 +109,18 @@ const Dashboard = () => {
           />
         </Space>
 
-        <Checkbox
-          checked={showTransfers}
-          onChange={(e) => setShowTransfers(e.target.checked)}
+        <Checkbox.Group
+          options={[
+            { label: 'Доходи', value: 'income' },
+            { label: 'Витрати', value: 'expense' },
+            { label: 'Перекази', value: 'transfer' },
+            { label: 'Дивіденди', value: 'dividend' },
+            { label: 'Інвестиції', value: 'investment' },
+          ]}
+          value={types}
+          onChange={(vals) => setTypes(vals)}
           style={{ marginLeft: '1rem' }}
-        >
-          Показувати перекази
-        </Checkbox>
+        />
       </div>
 
       <TransactionsTable
