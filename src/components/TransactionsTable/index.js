@@ -79,14 +79,12 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
 
         const items = []
 
-        if (record.type !== 'transfer') {
-          items.push({
-            key: 'edit',
-            label: 'Редагувати',
-            icon: <EditOutlined />,
-            onClick: () => editTransaction?.(record),
-          })
-        }
+        items.push({
+          key: 'edit',
+          label: 'Редагувати',
+          icon: <EditOutlined />,
+          onClick: () => editTransaction?.(record),
+        })
 
         items.push({
           key: 'delete',

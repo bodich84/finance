@@ -172,6 +172,43 @@ export const TransactionsProvider = ({ children }) => {
     }
   };
 
+  const updateTransfer = async ({ pairDocIds, from, to, amount, date }) => {
+    try {
+      if (!user) throw new Error("Not authenticated");
+      const [outId, inId] = pairDocIds || [];
+      if (!outId || !inId) throw new Error("pairDocIds required");
+
+      const batch = writeBatch(db);
+      const dateTs = normalizeDateToTimestamp(date ?? new Date());
+      const amt = Number(amount);
+
+      const outRef = doc(db, "workspaces", "mainWorkspace", "transactions", outId);
+      const inRef  = doc(db, "workspaces", "mainWorkspace", "transactions", inId);
+
+      batch.update(outRef, {
+        account: from,
+        amount: amt,
+        date: dateTs,
+        comments: `→ ${to}`,
+        updatedAt: serverTimestamp(),
+      });
+
+      batch.update(inRef, {
+        account: to,
+        amount: amt,
+        date: dateTs,
+        comments: `← ${from}`,
+        updatedAt: serverTimestamp(),
+      });
+
+      await batch.commit();
+      toast.success("Transfer updated!");
+    } catch (err) {
+      console.error("updateTransfer:", err.code, err.message);
+      toast.error(err.code === "permission-denied" ? "Немає доступу" : "Couldn't update transfer");
+    }
+  };
+
   const updateTransaction = async (id, updates) => {
     try {
       if (!user) throw new Error("Not authenticated");
@@ -231,6 +268,7 @@ export const TransactionsProvider = ({ children }) => {
         fetchTransactions,
         addTransaction,
         addTransfer,
+        updateTransfer,
         updateTransaction,
         deleteTransaction,
       }}
