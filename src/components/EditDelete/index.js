@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import "./styles.css";
 
-const EditEditDeleteModal = ({ transaction, onSave, onCancel, onDelete }) => {
+const EditTransactionModal = ({ transaction, onSave, onCancel, onDelete }) => {
   const [editedTransaction, setEditedTransaction] = useState(transaction);
-  console.log(editedTransaction);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -12,15 +11,14 @@ const EditEditDeleteModal = ({ transaction, onSave, onCancel, onDelete }) => {
       [name]: value,
     }));
   };
-  console.log(editedTransaction);
 
   const handleSave = () => {
     onSave(editedTransaction);
   };
 
   const handleDelete = () => {
-    onDelete(editedTransaction)
-  }
+    onDelete(editedTransaction);
+  };
 
   return (
     <div className="modal container">
@@ -69,4 +67,4 @@ const EditEditDeleteModal = ({ transaction, onSave, onCancel, onDelete }) => {
   );
 };
 
-export default EditEditDeleteModal;
+export default EditTransactionModal;

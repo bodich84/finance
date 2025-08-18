@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { DatePicker, Space, Checkbox } from 'antd'
 import TransactionsTable from '../components/TransactionsTable'
+import EditTransactionModal from '../components/EditDelete'
 import { useTransactions } from '../context/TransactionsContext'
 import { useDateRange } from '../context/DateRangeContext'
 
@@ -14,10 +15,23 @@ const normalizeToDate = (v) => {
 }
 
 const Dashboard = () => {
-  const { tableRows, transactions, deleteTransaction, editTransaction } = useTransactions()
+  const { tableRows, transactions, deleteTransaction, updateTransaction } = useTransactions()
   const { range, setRange, hasRange, startDate, endDate } = useDateRange()
 
   const [showTransfers, setShowTransfers] = useState(true)
+  const [editing, setEditing] = useState(null)
+
+  const startEdit = (t) => setEditing(t)
+  const cancelEdit = () => setEditing(null)
+  const handleSave = (t) => {
+    const { id, ...updates } = t
+    updateTransaction(id, updates)
+    setEditing(null)
+  }
+  const handleDelete = (t) => {
+    deleteTransaction(t.id)
+    setEditing(null)
+  }
 
   const data = useMemo(() => {
     const base = (tableRows?.length ? tableRows : transactions) || []
@@ -60,8 +74,16 @@ const Dashboard = () => {
       <TransactionsTable
         transactions={data}
         deleteTransaction={deleteTransaction}
-        editTransaction={editTransaction}
+        editTransaction={startEdit}
       />
+      {editing && (
+        <EditTransactionModal
+          transaction={editing}
+          onSave={handleSave}
+          onCancel={cancelEdit}
+          onDelete={handleDelete}
+        />
+      )}
     </div>
   )
 }
