@@ -3,6 +3,11 @@ import AccountSelect from './AccountSelect'
 import dayjs from 'dayjs'
 import {useEffect} from 'react'
 
+const toDayjs = (value) => {
+  if (!value) return dayjs()
+  return typeof value?.toDate === 'function' ? dayjs(value.toDate()) : dayjs(value)
+}
+
 const AddIncome = ({
   isIncomeModalVisible,
   handleIncomeCancel,
@@ -17,13 +22,14 @@ const AddIncome = ({
         amount: initialValues.amount,
         account: initialValues.account,
         name: initialValues.name,
-        date: initialValues.date ? dayjs(initialValues.date) : dayjs(),
+        date: toDayjs(initialValues.date),
         comments: initialValues.comments,
       })
-    } else {
+    } else if (isIncomeModalVisible) {
       form.resetFields()
+      form.setFieldsValue({date: dayjs()})
     }
-  }, [initialValues, form])
+  }, [initialValues, isIncomeModalVisible, form])
 
   const isEdit = !!initialValues
 
@@ -41,6 +47,7 @@ const AddIncome = ({
           onFinish={async (values) => {
             await onFinish(values, 'income')
             form.resetFields()
+            form.setFieldsValue({date: dayjs()})
           }}
         >
           <Form.Item
@@ -89,9 +96,12 @@ const AddIncome = ({
             rules={[
               {required: true, message: 'Please select the income date!'},
             ]}
-            initialValue={dayjs(new Date())}
           >
-            <DatePicker />
+            <DatePicker
+              showTime
+              format='DD.MM.YYYY HH:mm'
+              style={{width: '100%'}}
+            />
           </Form.Item>
 
           <Form.Item

@@ -3,6 +3,11 @@ import AccountSelect from './AccountSelect'
 import dayjs from 'dayjs'
 import {useEffect} from 'react'
 
+const toDayjs = (value) => {
+  if (!value) return dayjs()
+  return typeof value?.toDate === 'function' ? dayjs(value.toDate()) : dayjs(value)
+}
+
 const AddInvestment = ({
   isInvestmentModalVisible,
   handleInvestmentCancel,
@@ -17,13 +22,14 @@ const AddInvestment = ({
         amount: initialValues.amount,
         account: initialValues.account,
         name: initialValues.name,
-        date: initialValues.date ? dayjs(initialValues.date) : dayjs(),
+        date: toDayjs(initialValues.date),
         comments: initialValues.comments,
       })
-    } else {
+    } else if (isInvestmentModalVisible) {
       form.resetFields()
+      form.setFieldsValue({date: dayjs()})
     }
-  }, [initialValues, form])
+  }, [initialValues, isInvestmentModalVisible, form])
 
   const isEdit = !!initialValues
 
@@ -40,6 +46,7 @@ const AddInvestment = ({
         onFinish={async (values) => {
           await onFinish(values, 'investment')
           form.resetFields()
+          form.setFieldsValue({date: dayjs()})
         }}
       >
         <Form.Item
@@ -76,9 +83,12 @@ const AddInvestment = ({
           label='Дата'
           name='date'
           rules={[{required: true, message: 'Виберіть дату'}]}
-          initialValue={dayjs(new Date())}
         >
-          <DatePicker />
+          <DatePicker
+            showTime
+            format='DD.MM.YYYY HH:mm'
+            style={{width: '100%'}}
+          />
         </Form.Item>
 
         <Form.Item

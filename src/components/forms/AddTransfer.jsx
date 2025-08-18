@@ -3,6 +3,11 @@ import dayjs from 'dayjs'
 import AccountSelect from './AccountSelect'
 import {useEffect} from 'react'
 
+const toDayjs = (value) => {
+  if (!value) return dayjs()
+  return typeof value?.toDate === 'function' ? dayjs(value.toDate()) : dayjs(value)
+}
+
 const AddTransfer = ({
   isTransferModalVisible,
   handleTransferCancel,
@@ -17,12 +22,13 @@ const AddTransfer = ({
         from: initialValues.from,
         to: initialValues.to,
         amount: initialValues.amount,
-        date: initialValues.date ? dayjs(initialValues.date) : dayjs(),
+        date: toDayjs(initialValues.date),
       })
-    } else {
+    } else if (isTransferModalVisible) {
       form.resetFields()
+      form.setFieldsValue({date: dayjs()})
     }
-  }, [initialValues, form])
+  }, [initialValues, isTransferModalVisible, form])
 
   const isEdit = !!initialValues
 
@@ -43,6 +49,7 @@ const AddTransfer = ({
     }
     await onTransfer?.(payload) // далі у контексті робиш дві проводки з одним transferId
     form.resetFields()
+    form.setFieldsValue({date: dayjs()})
     handleTransferCancel()
   }
 
@@ -57,7 +64,6 @@ const AddTransfer = ({
         form={form}
         layout='vertical'
         onFinish={onFinish}
-        initialValues={{date: dayjs()}}
       >
         <Form.Item
           label='Сума'
@@ -121,7 +127,11 @@ const AddTransfer = ({
           name='date'
           rules={[{required: true, message: 'Оберіть дату'}]}
         >
-          <DatePicker style={{width: '100%'}} />
+          <DatePicker
+            showTime
+            format='DD.MM.YYYY HH:mm'
+            style={{width: '100%'}}
+          />
         </Form.Item>
 
         <Form.Item>

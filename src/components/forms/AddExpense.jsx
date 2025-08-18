@@ -4,6 +4,11 @@ import AccountSelect from './AccountSelect'
 import ExpenseCategorySelect from './ExpenseCategorySelect'
 import dayjs from 'dayjs'
 
+const toDayjs = (value) => {
+  if (!value) return dayjs()
+  return typeof value?.toDate === 'function' ? dayjs(value.toDate()) : dayjs(value)
+}
+
 const AddExpense = ({
   isExpenseModalVisible,
   handleExpenseCancel,
@@ -19,14 +24,15 @@ const AddExpense = ({
       form.setFieldsValue({
         amount: initialValues.amount,
         account: initialValues.account,
-        date: initialValues.date ? dayjs(initialValues.date) : dayjs(),
+        date: toDayjs(initialValues.date),
         comments: initialValues.comments,
       })
-    } else {
+    } else if (isExpenseModalVisible) {
       form.resetFields()
+      form.setFieldsValue({date: dayjs()})
       setSelectedCategory(null)
     }
-  }, [initialValues, form])
+  }, [initialValues, isExpenseModalVisible, form])
 
   const isEdit = !!initialValues
 
@@ -54,6 +60,7 @@ const AddExpense = ({
           }
           await onFinish({...values, name: selectedCategory}, 'expense')
           form.resetFields()
+          form.setFieldsValue({date: dayjs()})
           setSelectedCategory(null)
         }}
       >
@@ -98,9 +105,12 @@ const AddExpense = ({
           label='Дата'
           name='date'
           rules={[{required: true, message: 'Please select the expense date'}]}
-          initialValue={dayjs(new Date())}
         >
-          <DatePicker />
+          <DatePicker
+            showTime
+            format='DD.MM.YYYY HH:mm'
+            style={{width: '100%'}}
+          />
         </Form.Item>
 
         <Form.Item style={{fontWeight: 600}} label='Коментар' name='comments'>
