@@ -1,14 +1,36 @@
 import {Button, Modal, Form, Input, DatePicker} from 'antd'
 import AccountSelect from './AccountSelect'
 import dayjs from 'dayjs'
+import {useEffect} from 'react'
 
-const AddIncome = ({isIncomeModalVisible, handleIncomeCancel, onFinish}) => {
+const AddIncome = ({
+  isIncomeModalVisible,
+  handleIncomeCancel,
+  onFinish,
+  initialValues,
+}) => {
   const [form] = Form.useForm()
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue({
+        amount: initialValues.amount,
+        account: initialValues.account,
+        name: initialValues.name,
+        date: initialValues.date ? dayjs(initialValues.date) : dayjs(),
+        comments: initialValues.comments,
+      })
+    } else {
+      form.resetFields()
+    }
+  }, [initialValues, form])
+
+  const isEdit = !!initialValues
 
   return (
     <div>
       <Modal
-        title='Додати дохід'
+        title={isEdit ? 'Редагувати дохід' : 'Додати дохід'}
         open={isIncomeModalVisible}
         onCancel={handleIncomeCancel}
         footer={null}
@@ -16,8 +38,8 @@ const AddIncome = ({isIncomeModalVisible, handleIncomeCancel, onFinish}) => {
         <Form
           form={form}
           layout='vertical'
-          onFinish={(values) => {
-            onFinish(values, 'income')
+          onFinish={async (values) => {
+            await onFinish(values, 'income')
             form.resetFields()
           }}
         >
@@ -88,7 +110,7 @@ const AddIncome = ({isIncomeModalVisible, handleIncomeCancel, onFinish}) => {
 
           <Form.Item>
             <Button htmlType='submit' className='btn reset-balance-btn'>
-              Додати дохід
+              {isEdit ? 'Зберегти' : 'Додати дохід'}
             </Button>
           </Form.Item>
         </Form>

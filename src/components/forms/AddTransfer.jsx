@@ -1,13 +1,30 @@
 import {Modal, Form, InputNumber, Button, DatePicker} from 'antd'
 import dayjs from 'dayjs'
 import AccountSelect from './AccountSelect'
+import {useEffect} from 'react'
 
 const AddTransfer = ({
   isTransferModalVisible,
   handleTransferCancel,
   onTransfer,
+  initialValues,
 }) => {
   const [form] = Form.useForm()
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue({
+        from: initialValues.from,
+        to: initialValues.to,
+        amount: initialValues.amount,
+        date: initialValues.date ? dayjs(initialValues.date) : dayjs(),
+      })
+    } else {
+      form.resetFields()
+    }
+  }, [initialValues, form])
+
+  const isEdit = !!initialValues
 
   const normalizeDate = (val) => {
     if (!val) return new Date()
@@ -17,21 +34,21 @@ const AddTransfer = ({
     return new Date(val)
   }
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     const payload = {
       from: values.from,
       to: values.to,
       amount: Number(values.amount),
       date: normalizeDate(values.date),
     }
-    onTransfer?.(payload) // далі у контексті робиш дві проводки з одним transferId
+    await onTransfer?.(payload) // далі у контексті робиш дві проводки з одним transferId
     form.resetFields()
     handleTransferCancel()
   }
 
   return (
     <Modal
-      title='Переказ між рахунками'
+      title={isEdit ? 'Редагувати переказ' : 'Переказ між рахунками'}
       open={isTransferModalVisible}
       onCancel={handleTransferCancel}
       footer={null}
@@ -109,7 +126,7 @@ const AddTransfer = ({
 
         <Form.Item>
           <Button type='primary' htmlType='submit' block>
-            Здійснити переказ
+            {isEdit ? 'Зберегти' : 'Здійснити переказ'}
           </Button>
         </Form.Item>
       </Form>

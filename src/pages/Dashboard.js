@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react'
 import { DatePicker, Space, Checkbox } from 'antd'
 import TransactionsTable from '../components/TransactionsTable'
-import EditTransactionModal from '../components/EditDelete'
+import AddIncome from '../components/forms/AddIncome'
+import AddExpense from '../components/forms/AddExpense'
+import AddTransfer from '../components/forms/AddTransfer'
 import { useTransactions } from '../context/TransactionsContext'
 import { useDateRange } from '../context/DateRangeContext'
 
@@ -15,7 +17,13 @@ const normalizeToDate = (v) => {
 }
 
 const Dashboard = () => {
-  const { tableRows, transactions, deleteTransaction, updateTransaction } = useTransactions()
+  const {
+    tableRows,
+    transactions,
+    deleteTransaction,
+    updateTransaction,
+    updateTransfer,
+  } = useTransactions()
   const { range, setRange, hasRange, startDate, endDate } = useDateRange()
 
   const [showTransfers, setShowTransfers] = useState(true)
@@ -23,13 +31,32 @@ const Dashboard = () => {
 
   const startEdit = (t) => setEditing(t)
   const cancelEdit = () => setEditing(null)
-  const handleSave = (t) => {
-    const { id, ...updates } = t
-    updateTransaction(id, updates)
+
+  const handleEditFinish = async (values, type) => {
+    const date = normalizeToDate(values.date)
+    if (!date) return
+    const amount = Number(values.amount)
+    if (!Number.isFinite(amount)) return
+
+    await updateTransaction(editing.id, {
+      type,
+      date,
+      amount,
+      name: values.name,
+      comments: values.comments || '',
+      account: values.account,
+    })
     setEditing(null)
   }
-  const handleDelete = (t) => {
-    deleteTransaction(t.id)
+
+  const handleTransferEdit = async ({ from, to, amount, date }) => {
+    await updateTransfer({
+      pairDocIds: editing._pairDocIds,
+      from,
+      to,
+      amount,
+      date,
+    })
     setEditing(null)
   }
 
@@ -76,12 +103,28 @@ const Dashboard = () => {
         deleteTransaction={deleteTransaction}
         editTransaction={startEdit}
       />
-      {editing && (
-        <EditTransactionModal
-          transaction={editing}
-          onSave={handleSave}
-          onCancel={cancelEdit}
-          onDelete={handleDelete}
+      {editing?.type === 'income' && (
+        <AddIncome
+          isIncomeModalVisible
+          handleIncomeCancel={cancelEdit}
+          onFinish={handleEditFinish}
+          initialValues={editing}
+        />
+      )}
+      {editing?.type === 'expense' && (
+        <AddExpense
+          isExpenseModalVisible
+          handleExpenseCancel={cancelEdit}
+          onFinish={handleEditFinish}
+          initialValues={editing}
+        />
+      )}
+      {editing?.type === 'transfer' && (
+        <AddTransfer
+          isTransferModalVisible
+          handleTransferCancel={cancelEdit}
+          onTransfer={handleTransferEdit}
+          initialValues={editing}
         />
       )}
     </div>

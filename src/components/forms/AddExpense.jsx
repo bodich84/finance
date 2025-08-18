@@ -1,17 +1,39 @@
 import {Button, Modal, Form, Input, DatePicker} from 'antd'
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import AccountSelect from './AccountSelect'
 import ExpenseCategorySelect from './ExpenseCategorySelect'
 import dayjs from 'dayjs'
 
-const AddExpense = ({isExpenseModalVisible, handleExpenseCancel, onFinish}) => {
+const AddExpense = ({
+  isExpenseModalVisible,
+  handleExpenseCancel,
+  onFinish,
+  initialValues,
+}) => {
   const [form] = Form.useForm()
   const [selectedCategory, setSelectedCategory] = useState(null)
+
+  useEffect(() => {
+    if (initialValues) {
+      setSelectedCategory(initialValues.name)
+      form.setFieldsValue({
+        amount: initialValues.amount,
+        account: initialValues.account,
+        date: initialValues.date ? dayjs(initialValues.date) : dayjs(),
+        comments: initialValues.comments,
+      })
+    } else {
+      form.resetFields()
+      setSelectedCategory(null)
+    }
+  }, [initialValues, form])
+
+  const isEdit = !!initialValues
 
   return (
     <Modal
       style={{fontWeight: 600}}
-      title='Додати витрати'
+      title={isEdit ? 'Редагувати витрату' : 'Додати витрати'}
       open={isExpenseModalVisible}
       onCancel={() => {
         handleExpenseCancel()
@@ -23,14 +45,14 @@ const AddExpense = ({isExpenseModalVisible, handleExpenseCancel, onFinish}) => {
       <Form
         form={form}
         layout='vertical'
-        onFinish={(values) => {
+        onFinish={async (values) => {
           if (!selectedCategory) {
             form.setFields([
               {name: 'category', errors: ['Виберіть або додайте категорію']},
             ])
             return
           }
-          onFinish({...values, category: selectedCategory}, 'expense')
+          await onFinish({...values, name: selectedCategory}, 'expense')
           form.resetFields()
           setSelectedCategory(null)
         }}
@@ -87,7 +109,7 @@ const AddExpense = ({isExpenseModalVisible, handleExpenseCancel, onFinish}) => {
 
         <Form.Item>
           <Button htmlType='submit' className='btn reset-balance-btn'>
-            Додати витрату
+            {isEdit ? 'Зберегти' : 'Додати витрату'}
           </Button>
         </Form.Item>
       </Form>
