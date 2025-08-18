@@ -5,6 +5,7 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Statistics from './pages/Statistics'
 import BusinessModel from './pages/BusinessModel'
+import ProtectedRoute from './components/ProtectedRoute'
 import {ToastContainer} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -28,9 +29,30 @@ function App() {
 
         <Routes>
           <Route path='/' element={<Signup />} />
-          <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/statistics' element={<Statistics />} />
-          <Route path='/business-model' element={<BusinessModel />} />
+          <Route
+            path='/dashboard'
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/statistics'
+            element={
+              <ProtectedRoute>
+                <Statistics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/business-model'
+            element={
+              <ProtectedRoute>
+                <BusinessModel />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </div>
