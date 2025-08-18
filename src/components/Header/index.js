@@ -44,7 +44,7 @@ const Header = () => {
     setExpense(totalExpense)
     setDividend(totalDividend)
     setInvestment(totalInvestment)
-    setCurrentBalance(totalIncome - totalExpense + totalDividend - totalInvestment)
+    setCurrentBalance(totalIncome - totalExpense - totalDividend + totalInvestment)
   }, [transactions])
 
   const accountBalances = useMemo(() => {
@@ -52,9 +52,9 @@ const Header = () => {
     transactions.forEach((t) => {
       const amt = parseFloat(t.amount)
       if (!Number.isFinite(amt) || !t.account) return
-      if (t.type === 'income' || t.type === 'dividend')
+      if (t.type === 'income' || t.type === 'investment')
         balances[t.account] = (balances[t.account] || 0) + amt
-      else if (t.type === 'expense' || t.type === 'investment')
+      else if (t.type === 'expense' || t.type === 'dividend')
         balances[t.account] = (balances[t.account] || 0) - amt
     })
     return balances
@@ -95,7 +95,7 @@ const Header = () => {
         <HeaderWithAddButton />
         <div className='logo-wrap'>
           <div>
-            ₴ {currentBalance} / ₴ {income} / ₴ -{expense} / Дивіденди ₴ {dividend} /
+            ₴ {currentBalance} / ₴ {income} / ₴ -{expense} / Дивіденди ₴ -{dividend} /
             Інвестиції ₴ {investment}
           </div>
         </div>
