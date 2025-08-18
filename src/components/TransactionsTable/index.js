@@ -1,6 +1,13 @@
 import './styles.css'
 import { Table, Popconfirm, Dropdown, Button } from 'antd'
-import { DeleteOutlined, EditOutlined, MoreOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  MoreOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  SwapOutlined,
+} from '@ant-design/icons'
 import dayjs from 'dayjs'
 
 const normalizeToDate = (value) => {
@@ -46,6 +53,18 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
       title: 'Тип',
       dataIndex: 'type',
       key: 'type',
+      render: (type) => {
+        switch (type) {
+          case 'income':
+            return <ArrowUpOutlined style={{ color: 'green' }} />
+          case 'expense':
+            return <ArrowDownOutlined style={{ color: 'red' }} />
+          case 'transfer':
+            return <SwapOutlined style={{ color: 'black' }} />
+          default:
+            return type
+        }
+      },
     },
     { title: 'Назва', dataIndex: 'name', key: 'name' },
     { title: 'Коментарі', dataIndex: 'comments', key: 'comments' },
