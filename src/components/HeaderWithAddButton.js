@@ -3,7 +3,7 @@ import { Dropdown, Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useTransactions } from '../context/TransactionsContext';
 import { toast } from 'react-toastify';
-import AddIncome from './forms/AddIncome';
+// import AddIncome from './forms/AddIncome';
 import AddExpense from './forms/AddExpense';
 import AddTransfer from './forms/AddTransfer';
 
@@ -82,11 +82,11 @@ const HeaderWithAddButton = () => {
         handleExpenseCancel={handleExpenseCancel}
         onFinish={onFinish}
       />
-      <AddIncome
+      {/* <AddIncome
         isIncomeModalVisible={isIncomeModalVisible}
         handleIncomeCancel={handleIncomeCancel}
         onFinish={onFinish}
-      />
+      /> */}
       <AddTransfer
         isTransferModalVisible={isTransferModalVisible}
         handleTransferCancel={handleTransferCancel}
