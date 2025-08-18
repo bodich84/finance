@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Table } from 'antd';
 
-const API_TOKEN = '433607:80265139b087d9e83b4f4952f4d416cc';
-
 const FoodCosts = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,17 +8,15 @@ const FoodCosts = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`https://api.joinposter.com/menu.getMenu?token=${API_TOKEN}`);
-        const json = await res.json();
-        const items = json.response?.menu || json.response || [];
-        const products = Array.isArray(items)
-          ? items.flatMap((item) => item.products || item)
+        const res = await fetch('/api/poster/menu');
+        const products = await res.json();
+        const tableData = Array.isArray(products)
+          ? products.map((prod, index) => ({
+              key: prod.name || index,
+              name: prod.name,
+              primeCost: prod.prime_cost,
+            }))
           : [];
-        const tableData = products.map((prod) => ({
-          key: prod.product_id,
-          name: prod.product_name,
-          primeCost: prod.primeCost,
-        }));
         setData(tableData);
       } catch (e) {
         console.error('Failed to fetch food costs', e);
