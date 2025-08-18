@@ -12,9 +12,12 @@ import UserProfile from '../UserProfileFeture'
 import {Link} from 'react-router-dom'
 import {Drawer, Grid} from 'antd'
 import HeaderWithAddButton from '../HeaderWithAddButton'
+import {useAuthState} from 'react-firebase-hooks/auth'
+import {auth} from '../../firebase'
 
 const Header = () => {
   const {transactions} = useTransactions()
+  const [user] = useAuthState(auth)
 
   const [income, setIncome] = useState(0)
   const [expense, setExpense] = useState(0)
@@ -54,6 +57,8 @@ const Header = () => {
       label: 'Фін-модель',
     },
   ]
+
+  if (!user) return null
 
   return (
     <>
