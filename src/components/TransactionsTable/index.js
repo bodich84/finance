@@ -58,29 +58,32 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
             ? (record._pairDocIds?.[0] || record.id)
             : record.id
 
-        const items = [
-          {
+        const items = []
+
+        if (record.type !== 'transfer') {
+          items.push({
             key: 'edit',
             label: 'Редагувати',
             icon: <EditOutlined />,
             onClick: () => editTransaction?.(record),
-          },
-          {
-            key: 'delete',
-            label: (
-              <Popconfirm
-                title="Видалити?"
-                okText="Так"
-                cancelText="Ні"
-                onConfirm={() => deleteTransaction?.(docIdForDelete)}
-                onClick={(e) => e.stopPropagation()}
-              >
-                Видалити
-              </Popconfirm>
-            ),
-            icon: <DeleteOutlined style={{ color: 'red' }} />,
-          },
-        ]
+          })
+        }
+
+        items.push({
+          key: 'delete',
+          label: (
+            <Popconfirm
+              title="Видалити?"
+              okText="Так"
+              cancelText="Ні"
+              onConfirm={() => deleteTransaction?.(docIdForDelete)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              Видалити
+            </Popconfirm>
+          ),
+          icon: <DeleteOutlined style={{ color: 'red' }} />,
+        })
 
         return (
           <Dropdown menu={{ items }} trigger={['click']} placement="bottomRight">
