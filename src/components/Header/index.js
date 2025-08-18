@@ -1,5 +1,6 @@
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useMemo} from 'react'
 import {useTransactions} from '../../context/TransactionsContext'
+import {useAccounts} from '../../context/AccountsContext'
 import './styles.css'
 import {
   AiFillSetting,
@@ -17,6 +18,7 @@ import {auth} from '../../firebase'
 
 const Header = () => {
   const {transactions} = useTransactions()
+  const {accounts} = useAccounts()
   const [user] = useAuthState(auth)
 
   const [income, setIncome] = useState(0)
@@ -42,8 +44,29 @@ const Header = () => {
     setExpense(totalExpense)
     setDividend(totalDividend)
     setInvestment(totalInvestment)
-    setCurrentBalance(totalIncome - totalExpense)
+    setCurrentBalance(totalIncome - totalExpense + totalDividend - totalInvestment)
   }, [transactions])
+
+  const accountBalances = useMemo(() => {
+    const balances = {}
+    transactions.forEach((t) => {
+      const amt = parseFloat(t.amount)
+      if (!Number.isFinite(amt) || !t.account) return
+      if (t.type === 'income' || t.type === 'dividend')
+        balances[t.account] = (balances[t.account] || 0) + amt
+      else if (t.type === 'expense' || t.type === 'investment')
+        balances[t.account] = (balances[t.account] || 0) - amt
+    })
+    return balances
+  }, [transactions])
+
+  const accountNames = useMemo(() => {
+    const names = new Set([
+      ...accounts.map((a) => a.name),
+      ...Object.keys(accountBalances),
+    ])
+    return Array.from(names)
+  }, [accounts, accountBalances])
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -93,6 +116,18 @@ const Header = () => {
 
         {/* Settings icon */}
         <AiFillSetting className='menu-btn' onClick={toggleProfile} />
+      </div>
+
+      <div className='account-balances container'>
+        {accountNames.map((name) => (
+          <div key={name}>
+            {name}: ₴{' '}
+            {(accountBalances[name] || 0).toLocaleString('uk-UA', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </div>
+        ))}
       </div>
 
       {/* UserProfile */}

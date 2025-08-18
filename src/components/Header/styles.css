@@ -34,3 +34,10 @@
   color: var(--white);
   cursor: pointer;
 }
+
+.account-balances {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 1rem;
+}
