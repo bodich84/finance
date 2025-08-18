@@ -21,21 +21,27 @@ const Header = () => {
 
   const [income, setIncome] = useState(0)
   const [expense, setExpense] = useState(0)
+  const [dividend, setDividend] = useState(0)
+  const [investment, setInvestment] = useState(0)
   const [currentBalance, setCurrentBalance] = useState(0)
 
   useEffect(() => {
     let totalIncome = 0
     let totalExpense = 0
+    let totalDividend = 0
+    let totalInvestment = 0
 
     transactions.forEach((transaction) => {
-      if (transaction.type === 'income')
-        totalIncome += parseFloat(transaction.amount)
-      else if (transaction.type === 'expense')
-        totalExpense += parseFloat(transaction.amount)
+      if (transaction.type === 'income') totalIncome += parseFloat(transaction.amount)
+      else if (transaction.type === 'expense') totalExpense += parseFloat(transaction.amount)
+      else if (transaction.type === 'dividend') totalDividend += parseFloat(transaction.amount)
+      else if (transaction.type === 'investment') totalInvestment += parseFloat(transaction.amount)
     })
 
     setIncome(totalIncome)
     setExpense(totalExpense)
+    setDividend(totalDividend)
+    setInvestment(totalInvestment)
     setCurrentBalance(totalIncome - totalExpense)
   }, [transactions])
 
@@ -65,7 +71,10 @@ const Header = () => {
       <div className='navbar'>
         <HeaderWithAddButton />
         <div className='logo-wrap'>
-          <div>₴ {currentBalance} / ₴ {income} / ₴ -{expense}</div>
+          <div>
+            ₴ {currentBalance} / ₴ {income} / ₴ -{expense} / Дивіденди ₴ {dividend} /
+            Інвестиції ₴ {investment}
+          </div>
         </div>
 
         {/* Desktop menu */}

@@ -7,6 +7,8 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined,
   SwapOutlined,
+  DollarCircleOutlined,
+  StockOutlined,
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
@@ -61,6 +63,10 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
             return <ArrowDownOutlined style={{ color: 'red' }} />
           case 'transfer':
             return <SwapOutlined style={{ color: 'black' }} />
+          case 'dividend':
+            return <DollarCircleOutlined style={{ color: '#1890ff' }} />
+          case 'investment':
+            return <StockOutlined style={{ color: '#722ed1' }} />
           default:
             return type
         }
@@ -124,6 +130,8 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
             if (record.type === 'income') return 'row-income'
             if (record.type === 'expense') return 'row-expense'
             if (record.type === 'transfer') return 'row-transfer'
+            if (record.type === 'dividend') return 'row-dividend'
+            if (record.type === 'investment') return 'row-investment'
             return ''
           }}
         />

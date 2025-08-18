@@ -121,3 +121,11 @@
 .row-expense {
   background-color: #fff1f0; /* світло-червоний */
 }
+
+.row-dividend {
+  background-color: #e6f7ff; /* світло-блакитний */
+}
+
+.row-investment {
+  background-color: #f9f0ff; /* світло-фіолетовий */
+}
