@@ -8,6 +8,7 @@ import {
   AiOutlineBarChart,
   AiOutlineFundProjectionScreen,
   AiOutlineMenu,
+  AiOutlineUnorderedList,
 } from 'react-icons/ai'
 import UserProfile from '../UserProfileFeture'
 import {Link} from 'react-router-dom'
@@ -84,6 +85,11 @@ const Header = () => {
       to: '/business-model',
       icon: <AiOutlineFundProjectionScreen />,
       label: 'Фін-модель',
+    },
+    {
+      to: '/food-costs',
+      icon: <AiOutlineUnorderedList />,
+      label: 'Фудкост',
     },
   ]
 
