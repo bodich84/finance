@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { auth, db } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import {
-  collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
+  collection, getDocs, setDoc, updateDoc, deleteDoc, doc,
   Timestamp, query, orderBy, onSnapshot, serverTimestamp,
   writeBatch,
 } from "firebase/firestore";
@@ -106,16 +106,30 @@ export const TransactionsProvider = ({ children }) => {
   const addTransaction = async (t) => {
     try {
       if (!user) throw new Error("Not authenticated");
-      await addDoc(transactionsRef, {
+
+      const ref = doc(transactionsRef);
+      const payload = {
+        id: ref.id,
         ...t,
         date: normalizeDateToTimestamp(t.date ?? new Date()),
         createdBy: user.uid,
         createdAt: serverTimestamp(),
+      };
+
+      await setDoc(ref, payload);
+
+      setTransactions((prev) => {
+        const arr = [...prev, payload];
+        setTableRows(buildRows(arr));
+        return arr;
       });
+
       toast.success("Transaction added!");
     } catch (err) {
       console.error("addTransaction:", err.code, err.message);
-      toast.error(err.code === "permission-denied" ? "Немає доступу" : "Couldn't add transaction");
+      toast.error(
+        err.code === "permission-denied" ? "Немає доступу" : "Couldn't add transaction"
+      );
     }
   };
 
