@@ -46,10 +46,7 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
     {
       title: 'Рахунок',
       key: 'account',
-      render: (_, record) =>
-        record.type === 'transfer'
-          ? `${record.from} → ${record.to}`
-          : record.account || '—',
+      render: (_, record) => record.account || '—',
     },
     {
       title: 'Тип',
@@ -79,11 +76,6 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
       title: 'Дії',
       key: 'actions',
       render: (_, record) => {
-        const docIdForDelete =
-          record.type === 'transfer'
-            ? (record._pairDocIds?.[0] || record.id)
-            : record.id
-
         const items = []
 
         items.push({
@@ -100,7 +92,7 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
               title="Видалити?"
               okText="Так"
               cancelText="Ні"
-              onConfirm={() => deleteTransaction?.(docIdForDelete)}
+              onConfirm={() => deleteTransaction?.(record.id)}
               onClick={(e) => e.stopPropagation()}
             >
               Видалити
@@ -128,9 +120,9 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
           rowKey="id"
           className='table'
           rowClassName={(record) => {
+            if (record.isTransfer) return 'row-transfer'
             if (record.type === 'income') return 'row-income'
             if (record.type === 'expense') return 'row-expense'
-            if (record.type === 'transfer') return 'row-transfer'
             if (record.type === 'dividend') return 'row-dividend'
             if (record.type === 'investment') return 'row-investment'
             return ''

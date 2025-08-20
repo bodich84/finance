@@ -34,52 +34,43 @@ export const TransactionsProvider = ({ children }) => {
   };
 
   const buildRows = (list) => {
-    const rows = [];
-    const seen = new Set();
+    const byId = new Map(list.map((t) => [t.id, t]));
 
-    const byTid = new Map();
-    for (const t of list) {
-      if (t?.isTransfer && t?.transferId) {
-        const arr = byTid.get(t.transferId) ?? [];
-        arr.push({ ...t });
-        byTid.set(t.transferId, arr);
-      }
-    }
+    const rows = list.map((t) => {
+      const pair = t.isTransfer && t.pairId ? byId.get(t.pairId) : null;
+      const from = t.isTransfer
+        ? t.direction === 'out'
+          ? t.account
+          : pair?.account ?? ''
+        : undefined;
+      const to = t.isTransfer
+        ? t.direction === 'in'
+          ? t.account
+          : pair?.account ?? ''
+        : undefined;
 
-    for (const [tid, pair] of byTid) {
-      const out = pair.find(p => p.direction === 'out');
-      const inc = pair.find(p => p.direction === 'in');
-      if (out && inc) {
-        rows.push({
-          id: tid,
-          type: 'transfer',
-          from: out.account,
-          to: inc.account,
-          amount: out.amount,
-          date: out.date,
-          name: `${out.account} → ${inc.account}`,
-          comments: list.comments ?? '',
-          _pairDocIds: [out.id, inc.id],
-        });
-        seen.add(out.id); seen.add(inc.id);
-      }
-    }
-
-    for (const t of list) {
-      if (t.isTransfer && seen.has(t.id)) continue;
-      if (!t.isTransfer) {
-        rows.push({
-          id: t.id,
-          type: t.type,
-          account: t.account,
-          amount: t.amount,
-          date: t.date,
-          comments: t.comments ?? '',
-          name: t.name ?? '',
-          finmodel: t.finmodel ?? '',
-        });
-      }
-    }
+      return {
+        id: t.id,
+        type: t.type,
+        account: t.account,
+        amount: t.amount,
+        date: t.date,
+        comments: t.comments ?? '',
+        name: t.name ?? '',
+        finmodel: t.finmodel ?? '',
+        isTransfer: t.isTransfer,
+        transferId: t.transferId,
+        direction: t.direction,
+        pairId: t.pairId,
+        from,
+        to,
+        _pairDocIds: t.isTransfer
+          ? t.direction === 'out'
+            ? [t.id, t.pairId]
+            : [t.pairId, t.id]
+          : undefined,
+      };
+    });
 
     rows.sort((a, b) => {
       const ad = normalizeToDate(a.date)?.getTime() ?? 0;
