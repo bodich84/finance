@@ -73,6 +73,7 @@ const Dashboard = () => {
       name: values.name,
       comments: values.comments || '',
       account: values.account,
+      finmodel: values.finmodel,
     })
     setEditing(null)
   }

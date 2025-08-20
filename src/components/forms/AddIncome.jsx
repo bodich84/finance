@@ -1,5 +1,6 @@
 import {Button, Modal, Form, Input, DatePicker} from 'antd'
 import AccountSelect from './AccountSelect'
+import FinModelSelect from './FinModelSelect'
 import dayjs from 'dayjs'
 import {useEffect} from 'react'
 
@@ -22,6 +23,7 @@ const AddIncome = ({
         amount: initialValues.amount,
         account: initialValues.account,
         name: initialValues.name,
+        finmodel: initialValues.finmodel,
         date: toDayjs(initialValues.date),
         comments: initialValues.comments,
       })
@@ -59,6 +61,15 @@ const AddIncome = ({
             ]}
           >
             <Input type='number' inputMode='decimal' addonBefore='₴' />
+          </Form.Item>
+
+          <Form.Item
+            style={{fontWeight: 600}}
+            label='Finmodel'
+            name='finmodel'
+            rules={[{required: true, message: 'Оберіть фінмодель'}]}
+          >
+            <FinModelSelect />
           </Form.Item>
 
           <Form.Item

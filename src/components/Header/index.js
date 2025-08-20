@@ -8,6 +8,7 @@ import {
   AiOutlineBarChart,
   AiOutlineFundProjectionScreen,
   AiOutlineMenu,
+  AiOutlineSetting,
 } from 'react-icons/ai'
 import UserProfile from '../UserProfileFeture'
 import {Link} from 'react-router-dom'
@@ -85,6 +86,7 @@ const Header = () => {
       icon: <AiOutlineFundProjectionScreen />,
       label: 'Фін-модель',
     },
+    { to: '/settings', icon: <AiOutlineSetting />, label: 'Налаштування' },
   ]
 
   if (!user) return null

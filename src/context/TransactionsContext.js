@@ -76,6 +76,7 @@ export const TransactionsProvider = ({ children }) => {
           date: t.date,
           comments: t.comments ?? '',
           name: t.name ?? '',
+          finmodel: t.finmodel ?? '',
         });
       }
     }
