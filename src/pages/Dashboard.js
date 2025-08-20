@@ -91,7 +91,10 @@ const Dashboard = () => {
 
   const data = useMemo(() => {
     const base = (tableRows?.length ? tableRows : transactions) || []
-    const byType = base.filter((t) => types.includes(t.type))
+    const byType = base.filter((t) => {
+      const key = t.isTransfer ? 'transfer' : t.type
+      return types.includes(key)
+    })
     if (!hasRange) return byType
 
     const startTs = startDate.getTime()
@@ -134,7 +137,7 @@ const Dashboard = () => {
         deleteTransaction={deleteTransaction}
         editTransaction={startEdit}
       />
-      {editing?.type === 'income' && (
+      {editing?.type === 'income' && !editing?.isTransfer && (
         <AddIncome
           isIncomeModalVisible
           handleIncomeCancel={cancelEdit}
@@ -142,7 +145,7 @@ const Dashboard = () => {
           initialValues={editing}
         />
       )}
-      {editing?.type === 'expense' && (
+      {editing?.type === 'expense' && !editing?.isTransfer && (
         <AddExpense
           isExpenseModalVisible
           handleExpenseCancel={cancelEdit}
@@ -166,7 +169,7 @@ const Dashboard = () => {
           initialValues={editing}
         />
       )}
-      {editing?.type === 'transfer' && (
+      {editing?.isTransfer && (
         <AddTransfer
           isTransferModalVisible
           handleTransferCancel={cancelEdit}
