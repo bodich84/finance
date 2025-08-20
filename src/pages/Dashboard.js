@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { DatePicker, Space, Checkbox } from 'antd'
+import { DatePicker, Space, Select } from 'antd'
 import TransactionsTable from '../components/TransactionsTable'
 import AddIncome from '../components/forms/AddIncome'
 import AddExpense from '../components/forms/AddExpense'
@@ -10,6 +10,14 @@ import { useTransactions } from '../context/TransactionsContext'
 import { useDateRange } from '../context/DateRangeContext'
 
 const { RangePicker } = DatePicker
+
+const TYPE_OPTIONS = [
+  { label: 'Доходи', value: 'income' },
+  { label: 'Витрати', value: 'expense' },
+  { label: 'Перекази', value: 'transfer' },
+  { label: 'Дивіденди', value: 'dividend' },
+  { label: 'Інвестиції', value: 'investment' },
+]
 
 const normalizeToDate = (v) => {
   if (!v) return null
@@ -109,17 +117,14 @@ const Dashboard = () => {
           />
         </Space>
 
-        <Checkbox.Group
-          options={[
-            { label: 'Доходи', value: 'income' },
-            { label: 'Витрати', value: 'expense' },
-            { label: 'Перекази', value: 'transfer' },
-            { label: 'Дивіденди', value: 'dividend' },
-            { label: 'Інвестиції', value: 'investment' },
-          ]}
+        <Select
+          mode='multiple'
+          allowClear
+          placeholder='Типи транзакцій'
+          options={TYPE_OPTIONS}
           value={types}
           onChange={(vals) => setTypes(vals)}
-          style={{ marginLeft: '1rem' }}
+          style={{ minWidth: 200, marginLeft: '1rem' }}
         />
       </div>
 
