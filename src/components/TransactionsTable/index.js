@@ -73,6 +73,7 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
       },
     },
     { title: 'Назва', dataIndex: 'name', key: 'name' },
+    { title: 'Finmodel', dataIndex: 'finmodel', key: 'finmodel', render: (v) => v || '—' },
     { title: 'Коментарі', dataIndex: 'comments', key: 'comments' },
     {
       title: 'Дії',

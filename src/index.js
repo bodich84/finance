@@ -5,6 +5,7 @@ import {TransactionsProvider} from './context/TransactionsContext'
 import {ExpenseCategoriesProvider} from './context/ExpenseCategoriesContext'
 import {DateRangeProvider} from './context/DateRangeContext'
 import {AccountsProvider} from './context/AccountsContext'
+import {FinModelsProvider} from './context/FinModelsContext'
 import './index.css'
 import {register} from './serviceWorkerRegistration'
 
@@ -16,7 +17,9 @@ ReactDOM.render(
       <TransactionsProvider>
         <DateRangeProvider>
           <AccountsProvider>
-            <App />
+            <FinModelsProvider>
+              <App />
+            </FinModelsProvider>
           </AccountsProvider>
         </DateRangeProvider>
       </TransactionsProvider>

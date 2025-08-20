@@ -2,6 +2,7 @@ import {Button, Modal, Form, Input, DatePicker} from 'antd'
 import {useState, useEffect} from 'react'
 import AccountSelect from './AccountSelect'
 import ExpenseCategorySelect from './ExpenseCategorySelect'
+import FinModelSelect from './FinModelSelect'
 import dayjs from 'dayjs'
 
 const toDayjs = (value) => {
@@ -24,6 +25,7 @@ const AddExpense = ({
       form.setFieldsValue({
         amount: initialValues.amount,
         account: initialValues.account,
+        finmodel: initialValues.finmodel,
         date: toDayjs(initialValues.date),
         comments: initialValues.comments,
       })
@@ -71,6 +73,15 @@ const AddExpense = ({
           rules={[{required: true, message: 'Please enter the expense amount'}]}
         >
           <Input type='number' inputMode='decimal' addonBefore='₴' />
+        </Form.Item>
+
+        <Form.Item
+          style={{fontWeight: 600}}
+          label='Finmodel'
+          name='finmodel'
+          rules={[{required: true, message: 'Оберіть фінмодель'}]}
+        >
+          <FinModelSelect />
         </Form.Item>
 
         <Form.Item

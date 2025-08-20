@@ -5,6 +5,7 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Statistics from './pages/Statistics'
 import BusinessModel from './pages/BusinessModel'
+import Settings from './pages/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
 import {ToastContainer} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -50,6 +51,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <BusinessModel />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/settings'
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />
