@@ -8,6 +8,7 @@ import AddDividend from '../components/forms/AddDividend'
 import AddInvestment from '../components/forms/AddInvestment'
 import { useTransactions } from '../context/TransactionsContext'
 import { useDateRange } from '../context/DateRangeContext'
+import { normalizeToDate } from '../utils/date'
 
 const { RangePicker } = DatePicker
 
@@ -18,13 +19,6 @@ const TYPE_OPTIONS = [
   { label: 'Дивіденди', value: 'dividend' },
   { label: 'Інвестиції', value: 'investment' },
 ]
-
-const normalizeToDate = (v) => {
-  if (!v) return null
-  if (typeof v?.toDate === 'function') return v.toDate()
-  if (v instanceof Date) return v
-  return new Date(v)
-}
 
 const Dashboard = () => {
   const {

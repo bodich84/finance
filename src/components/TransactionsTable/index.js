@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react'
 import './styles.css'
 import { Table, Popconfirm, Dropdown, Button } from 'antd'
 import {
@@ -11,16 +12,10 @@ import {
   StockOutlined,
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
-
-const normalizeToDate = (value) => {
-  if (!value) return null
-  if (typeof value?.toDate === 'function') return value.toDate()
-  if (value instanceof Date) return value
-  return new Date(value)
-}
+import { normalizeToDate } from '../../utils/date'
 
 const TransactionsTable = ({ transactions, deleteTransaction, editTransaction }) => {
-  const columns = [
+  const columns = useMemo(() => [
     {
       title: 'Дата',
       dataIndex: 'date',
@@ -29,18 +24,14 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
         const d = normalizeToDate(value)
         return d ? dayjs(d).format('DD.MM.YY') : ''
       },
-      // sorter: (a, b) => {
-      //   const da = normalizeToDate(a.date)?.getTime() ?? 0
-      //   const db = normalizeToDate(b.date)?.getTime() ?? 0
-      //   return da - db
-      // },
       defaultSortOrder: 'descend',
     },
     {
       title: 'Сума',
       dataIndex: 'amount',
       key: 'amount',
-      render: (v) => Number(v).toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      render: (v) =>
+        Number(v).toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
       sorter: (a, b) => Number(a.amount) - Number(b.amount),
     },
     {
@@ -108,7 +99,16 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
         )
       },
     },
-  ]
+  ], [deleteTransaction, editTransaction])
+
+  const rowClassName = useCallback((record) => {
+    if (record.isTransfer) return 'row-transfer'
+    if (record.type === 'income') return 'row-income'
+    if (record.type === 'expense') return 'row-expense'
+    if (record.type === 'dividend') return 'row-dividend'
+    if (record.type === 'investment') return 'row-investment'
+    return ''
+  }, [])
 
   return (
     <div className='table-box container'>
@@ -119,14 +119,7 @@ const TransactionsTable = ({ transactions, deleteTransaction, editTransaction })
           columns={columns}
           rowKey="id"
           className='table'
-          rowClassName={(record) => {
-            if (record.isTransfer) return 'row-transfer'
-            if (record.type === 'income') return 'row-income'
-            if (record.type === 'expense') return 'row-expense'
-            if (record.type === 'dividend') return 'row-dividend'
-            if (record.type === 'investment') return 'row-investment'
-            return ''
-          }}
+          rowClassName={rowClassName}
         />
       </div>
     </div>

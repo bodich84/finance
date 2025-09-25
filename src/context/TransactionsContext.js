@@ -7,17 +7,10 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { toast } from "react-toastify";
+import { normalizeToDate } from "../utils/date";
 
 const TransactionsContext = createContext();
 export const useTransactions = () => useContext(TransactionsContext);
-
-// ✅ уніфікація дат
-const normalizeToDate = (value) => {
-  if (!value) return null;
-  if (typeof value?.toDate === 'function') return value.toDate(); // Firestore.Timestamp
-  if (value instanceof Date) return value;
-  return new Date(value); // string/number/dayjs -> Date
-};
 
 export const TransactionsProvider = ({ children }) => {
   const [user] = useAuthState(auth);

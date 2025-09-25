@@ -8,13 +8,7 @@ import AddExpense from './forms/AddExpense';
 import AddTransfer from './forms/AddTransfer';
 import AddDividend from './forms/AddDividend';
 import AddInvestment from './forms/AddInvestment';
-
-const normalizeToDate = (v) => {
-  if (!v) return null;
-  if (typeof v?.toDate === 'function') return v.toDate(); // dayjs/antd
-  if (v instanceof Date) return v;
-  return new Date(v);
-};
+import { normalizeToDate } from '../utils/date';
 
 const HeaderWithAddButton = () => {
   const { addTransaction, addTransfer } = useTransactions();
